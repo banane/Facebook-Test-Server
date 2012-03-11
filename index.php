@@ -4,23 +4,32 @@
 ?>
 <html>
 <style type="text/css">
-.error, h2 {
-	background-color:red;
-	color:white;
-	border:1px solid grey;
-	width:200px;
+body {
 	padding:4px;
 	margin:4px;
 	font-family:arial;
 	font-size:10px;
+}
+.error td, .warning td {
+	margin:4px;
+	padding:4px;
+		background-color:red;
+		color:white;
+		border:1px solid grey;
+		width:200px;
 	}
+.warning td{
+	background-color:yellow;
+	color:black;
+	
+}
 </style>
 <?php
 
 
-require('/var/www/html/tools/dBug.php');
+//require('/var/www/html/tools/dBug.php');
 // me test
-new dBug($_REQUEST);
+
 $return_object = new stdClass();
 $uid = 100;
 
@@ -32,17 +41,32 @@ if(isset($_REQUEST['method'])){
 		returnFeedPost($_REQUEST);
 	}
 }
-new dBug($return_object);
+
 if(isset($return_object->error)){
+	echo "<div class=error>";
 	echo "<h2>errors</h2>";
+	echo "<table>";
 	foreach($return_object->error as $type=>$err){
-		echo "<div class=error>";
 		foreach ($err as $value){
-			echo $type .": " .$value;			
+			echo "<tr><td><strong>".$type ."</strong></td><td> " .$value."</td></tr>";			
 		}
-		echo "</div>";
 	}
+	echo "</table></div>";
 }
+
+if(isset($return_object->warning)){
+	echo "<div class=warning>";
+	echo "<h2>warnings</h2>";
+	echo "<table>";
+	foreach($return_object->warning as $type=>$warn){
+		foreach ($warn as $value){
+			echo "<tr><td><strong>".$type ."</strong></td><td> " .$value."</td></tr>";			
+		}
+	}
+	echo "</table>";
+	echo "</div>";
+}
+
 $return_str = json_encode($return_object);
 echo $return_str;
 
@@ -68,6 +92,9 @@ function returnUser(){
 function returnFeedPost($_REQUEST){
 	global $return_object;
 
+	if(!isset($_REQUEST['link'])){
+		$return_object->error['picture'][] = "No link provided.";
+	}
 	if(isset($_REQUEST['picture'])){
 		// check not https
 		if(isset($_REQUEST['picture'])){
@@ -82,6 +109,18 @@ function returnFeedPost($_REQUEST){
 	}
 	if(!isset($_REQUEST['message'])){
 			$return_object->error['message'][] = "No message - no text or story- for feed story";
+	}
+	if(!isset($_REQUEST['name'])){
+		$return_object->error['name'][] = "No name.";		
+	}
+	if(!isset($_REQUEST['caption'])){
+		$return_object->warning['caption'][] = "No caption.";		
+	}
+	if(!isset($_REQUEST['properties'])){
+		$return_object->warning['properties'][] = "No properties - is that OK?";
+	}
+	if(!isset($_REQUEST['actions'])){
+		$return_object->warning['action_links'][] = "No actions - is that OK?";
 	}
 	$return_object->message = $_REQUEST['message'];
 	$return_object->picture = $_REQUEST['picture'];
