@@ -1,0 +1,12 @@
+README
+
+A server to test Facebook. 
+
+Current methods supported:
+
+- me
+- feed post (via JS)
+
+Currently processing any requests via POST or GET.
+
+Work in progress- comments welcome.
